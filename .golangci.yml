@@ -1,0 +1,20 @@
+linters-settings:
+  golint:
+    min-confidence: 0
+  misspell:
+    locale: US
+linters:
+  disable-all: true
+  enable:
+    - typecheck
+    - goimports
+    - misspell
+    - govet
+    - revive
+    - ineffassign
+    - gosimple
+    - unused
+    - errcheck
+
+service:
+  golangci-lint-version: 1.48.0

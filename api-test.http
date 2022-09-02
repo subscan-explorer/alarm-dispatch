@@ -1,0 +1,70 @@
+POST http://localhost:8080/alert_manager
+Content-Type: application/json
+
+{
+  "version": "4",
+  "status": "firing",
+  "groupLabels": {
+  },
+  "commonLabels": {
+  },
+  "commonAnnotations": {
+    "summary": "alarms demo"
+  },
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "labels": "labels",
+        "xx": "ss",
+        "job": "subscan-email"
+      },
+      "annotations": {
+        "title": "this is something message1"
+      },
+      "startsAt": "2022-08-31T15:41:12.79281+08:00",
+      "endsAt": "2022-08-31T17:41:12.79281+08:00"
+    },
+    {
+      "status": "firing",
+      "labels": {
+        "labels": "hehe",
+        "xx": "ss",
+        "job": "subscan-element"
+      },
+      "annotations": {
+        "title": "this is something message2"
+      },
+      "startsAt": "2022-08-31T15:41:12.79281+08:00",
+      "endsAt": "2022-08-31T17:41:12.79281+08:00"
+    },
+    {
+      "status": "firing",
+      "labels": {
+        "labels": "hehe",
+        "xx": "ss",
+        "job": "subscan-slack"
+      },
+      "annotations": {
+        "title": "this is something message3"
+      },
+      "startsAt": "2022-08-31T15:41:12.79281+08:00",
+      "endsAt": "2022-08-31T17:41:12.79281+08:00"
+    },
+    {
+      "status": "firing",
+      "labels": {
+        "labels": "hehe",
+        "xx": "ss",
+        "job": "subscan-tg"
+      },
+      "annotations": {
+        "title": "this is something message4"
+      },
+      "startsAt": "2022-08-31T15:41:12.79281+08:00",
+      "endsAt": "2022-08-31T17:41:12.79281+08:00"
+    }
+  ]
+}
+
+###
