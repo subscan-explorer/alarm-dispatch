@@ -5,11 +5,13 @@ permissions:
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main","develop" ]
     paths-ignore:
       - conf/**.yaml
       - '**.md'
   push:
+    tags: ["*"]
+    branches: ["develop"]
     paths-ignore:
       - conf/**.yaml
       - '**.md'
@@ -30,3 +32,97 @@ jobs:
         with:
           version: latest
           args: --timeout=3m
+
+  build-deploy:
+    name: Build, Test, Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Check tag base
+        id: check-base
+        env:
+          branch: master
+        run: |
+          EXISTS=$([[ "$(git branch -r --contains ${{ github.sha }})[@]" =~ "$branch" ]] && echo true || echo false)
+          if   [[ '${{ github.event_name }}' == 'push' ]]; then
+            MESSAGE=$(echo $(git log --format=%B -n 1 HEAD))
+          elif [[ '${{ github.event_name }}' == 'pull_request' ]]; then
+            MESSAGE=$(echo $(git log --format=%B -n 1 HEAD^2))
+          fi
+
+          echo "::set-output name=IN_MASTER::$EXISTS"
+          echo "::set-output name=COMMIT_MESSAGE::$MESSAGE"
+          echo "::set-output name=GO_CACHE::$(go env GOCACHE)"
+          echo "::set-output name=GO_MOD_CACHE::$(go env GOMODCACHE)"
+
+          echo "in_master is $EXISTS"
+          echo "commit message is $MESSAGE"
+          echo "github-sha is ${{ github.sha }}"
+          echo "`git branch -l`"
+
+      - uses: actions/checkout@v2
+        with:
+          repository: itering/actions
+          path: .github/actions
+          persist-credentials: false
+          ssh-key: "${{ secrets.ITERING_ACTIONS_DEPLOY_KEY }}"
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Setup Golang caches
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ steps.check-base.outputs.GO_CACHE }}
+            ${{ steps.check-base.outputs.GO_MOD_CACHE }}
+          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-golang-
+
+      - name: Build
+        run: make build
+
+      - name: Mainnet deploy
+        uses: ./.github/actions/docker-build-deploy
+        if: startsWith(github.ref, 'refs/tags/') && steps.check-base.outputs.IN_MASTER == 'true'
+        with:
+          deploy_phase: mainnet
+          login_username: _json_key
+          login_password: ${{ secrets.GCR_SA_KEY }}
+          docker_registry: asia.gcr.io/${{ secrets.GCR_PROJECT_ID }}
+          trigger_token: ${{ secrets.ITERING_DEPLOYMENT_TRIGGER_TOKEN }}
+          trigger_endpoint: ${{ secrets.ITERING_DEPLOYMENT_TRIGGER_ENDPOINT }}
+
+      - name: Testnet deploy
+        uses: ./.github/actions/docker-build-deploy
+        if: github.ref == 'refs/heads/develop'
+        with:
+          deploy_phase: testnet
+          login_username: _json_key
+          login_password: ${{ secrets.GCR_SA_KEY }}
+          docker_registry: asia.gcr.io/${{ secrets.GCR_PROJECT_ID }}
+          trigger_token: ${{ secrets.ITERING_DEPLOYMENT_TRIGGER_TOKEN }}
+          trigger_endpoint: ${{ secrets.ITERING_DEPLOYMENT_TRIGGER_ENDPOINT }}
+          skip_deploy: "${{ contains(steps.check-base.outputs.COMMIT_MESSAGE, '[skip deploy]') }}"
+
+      - name: Preview image
+        uses: ./.github/actions/docker-build-deploy
+        if: "contains(steps.check-base.outputs.COMMIT_MESSAGE, '[build preview]')"
+        with:
+          login_username: _json_key
+          login_password: ${{ secrets.GCR_SA_KEY }}
+          docker_registry: asia.gcr.io/${{ secrets.GCR_PROJECT_ID }}
+          skip_deploy: true
+
+      - uses: 8398a7/action-slack@v3
+        if: failure()
+        with:
+          status: ${{ job.status }}
+          fields: repo,author,eventName,workflow,ref,commit
+          channel: ${{ secrets.SLACK_CHANNEL_ID }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_INCOMING_WEBHOOK_URL }}

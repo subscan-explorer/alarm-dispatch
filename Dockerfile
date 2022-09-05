@@ -8,20 +8,20 @@ ADD go.mod .
 ADD go.sum .
 RUN go mod download
 
-WORKDIR /app/release
+WORKDIR /workspace/release
 
 ADD . .
 RUN go build -o alarm-dispatch cmd/main.go
 
 FROM alpine as prod
 
-RUN mkdir -p /app/bin/
+RUN mkdir -p /workspace/bin/
 
-COPY --from=build /app/release/alarm-dispatch /app/bin/alarm-dispatch
+COPY --from=build /workspace/release/alarm-dispatch /workspace/bin/alarm-dispatch
 
-WORKDIR /app/
+WORKDIR /workspace/
 
-CMD ["bin/alarm-dispatch"]
+CMD ["/workspace/bin/alarm-dispatch"]
 
 
 
