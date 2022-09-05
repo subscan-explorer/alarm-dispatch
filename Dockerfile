@@ -22,7 +22,7 @@ COPY --from=build /workspace/release/alarm-dispatch /workspace/bin/alarm-dispatc
 
 WORKDIR /workspace/
 
-CMD ["/workspace/bin/alarm-dispatch"]
+CMD ["./bin/alarm-dispatch"]
 
 
 
