@@ -13,15 +13,40 @@ import (
 var Conf Config
 
 type Config struct {
-	Filter    Filter     `yaml:"filter"`
+	Alert     Alert      `yaml:"alert"`
+	Label     Label      `yaml:"label"`
 	Dispatch  Dispatch   `yaml:"dispatch"`
 	Receivers []Receiver `yaml:"receivers"`
 	Email     Email      `yaml:"email"`
 	Matrix    []Matrix   `yaml:"matrix"`
 }
 
+type Alert struct {
+	Filter Filter `yaml:"filter"`
+}
+
+type ReplaceValue struct {
+	Regex string `yaml:"regex"`
+	Value string `yaml:"value"`
+}
+
+type Label struct {
+	Exclude struct {
+		Label LabelKV `yaml:"label"`
+	} `yaml:"exclude"`
+	Keep struct {
+		Label LabelKV `yaml:"label"`
+	} `yaml:"keep"`
+	Replace struct {
+		Label struct {
+			Key   []ReplaceValue `yaml:"key"`
+			Value []ReplaceValue `yaml:"value"`
+		} `yaml:"label"`
+	} `yaml:"replace"`
+}
+
 type Filter struct {
-	Label Label `yaml:"label"`
+	Label LabelKV `yaml:"label"`
 }
 
 type Dispatch struct {
@@ -31,10 +56,10 @@ type Dispatch struct {
 
 type LabelMatch struct {
 	Receiver []string `yaml:"receiver"`
-	Label    `yaml:",inline"`
+	LabelKV  `yaml:",inline"`
 }
 
-type Label struct {
+type LabelKV struct {
 	Key         []string            `yaml:"key"`
 	Value       []string            `yaml:"value"`
 	Combination []map[string]string `yaml:"combination"`
@@ -87,6 +112,7 @@ func InitConf(_ context.Context) {
 	fmt.Printf("%+v\n", Conf)
 	// check channel
 	emailConf := false
+	slack := false
 	for _, c := range Conf.Receivers {
 		switch c.Type {
 		case "email":
@@ -98,6 +124,7 @@ func InitConf(_ context.Context) {
 			if len(c.Webhook) == 0 {
 				log.Fatalln("slack needs to configure webhook")
 			}
+			slack = true
 		case "telegram":
 			if len(c.Webhook) == 0 && len(c.Token) == 0 {
 				log.Fatalln("telegram needs to configure webhook or token")
@@ -123,6 +150,29 @@ func InitConf(_ context.Context) {
 		}
 		if Conf.Email.Port == 0 {
 			log.Fatalln("email needs to configure port")
+		}
+		if len(Conf.Email.Secret) == 0 {
+			log.Fatalln("email needs to configure secret")
+		}
+	}
+	if slack {
+		if len(Conf.Matrix) == 0 {
+			log.Fatalln("needs to configure matrix")
+		}
+		for _, matrix := range Conf.Matrix {
+			if len(matrix.Host) == 0 {
+				log.Fatalln("matrix needs to configure host")
+			}
+			if len(matrix.User) == 0 {
+				log.Fatalln("matrix needs to configure user")
+			}
+			if len(matrix.Password) == 0 {
+				log.Fatalln("matrix needs to configure password")
+			}
+			if len(matrix.Name) == 0 {
+				log.Fatalln("matrix needs to configure name")
+			}
+
 		}
 	}
 }

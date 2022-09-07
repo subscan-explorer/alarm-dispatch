@@ -45,11 +45,11 @@ func (n *Notifier) Notify(ctx context.Context, common map[string]string, alert m
 	)
 	fmt.Println(string(reqBody))
 	if req, err = http.NewRequestWithContext(ctx, http.MethodPost, host, bytes.NewReader(reqBody)); err != nil {
-		return false, err
+		return true, err
 	}
 	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
 	if rsp, err = cli.HTTPCli.Do(req); err != nil {
-		return false, err
+		return true, err
 	}
 	defer rsp.Body.Close()
 	//_, _ = io.Copy(io.Discard, rsp.Body)
@@ -64,7 +64,7 @@ func (n *Notifier) Notify(ctx context.Context, common map[string]string, alert m
 func (n *Notifier) buildMessage(_ map[string]string, alert model.Alert) Message {
 	return Message{
 		ChatID:    n.conf.ChatID,
-		Text:      alert.HTML(),
+		Text:      alert.HTML("\n", ""),
 		ParseMode: "Html",
 	}
 }

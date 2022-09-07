@@ -1,7 +1,6 @@
 package dispatch
 
 import (
-	"log"
 	"regexp"
 	"sync"
 
@@ -13,14 +12,9 @@ var p *Process
 var one sync.Once
 
 type Process struct {
-	filter *label
-	match  match
-}
-
-type label struct {
-	Key         []*regexp.Regexp
-	Value       []*regexp.Regexp
-	Combination []combination
+	alertPcs AlertProcessor
+	labelPcs LabelProcessor
+	match    match
 }
 
 type combination struct {
@@ -45,50 +39,18 @@ func InitProcess() *Process {
 
 func initialization() {
 	p = new(Process)
-	p.initFilter()
+	p.init()
 	p.initDispatch()
-	log.Printf("filter: %+v\n", p.filter)
-	log.Printf("dispatch: %+v\n", p.match)
 }
 
-func buildLabel(lb conf.Label) *label {
-	f := new(label)
-	for _, k := range lb.Key {
-		if len(k) == 0 {
-			continue
-		}
-		f.Key = append(f.Key, regexp.MustCompile(k))
-	}
-	for _, v := range lb.Value {
-		if len(v) == 0 {
-			continue
-		}
-		f.Value = append(f.Value, regexp.MustCompile(v))
-	}
-	for _, m := range lb.Combination {
-		for k, v := range m {
-			var c = combination{
-				regexp.MustCompile(k),
-				regexp.MustCompile(v),
-			}
-			f.Combination = append(f.Combination, c)
-		}
-	}
-	if len(f.Key) != 0 || len(f.Value) != 0 || len(f.Combination) != 0 {
-		p.filter = f
-	}
-	return f
-}
-
-func (p *Process) initFilter() {
-	if lb := buildLabel(conf.Conf.Filter.Label); lb != nil {
-		p.filter = lb
-	}
+func (p *Process) init() {
+	p.alertPcs = NewAlertProcess(conf.Conf.Alert)
+	p.labelPcs = NewLabelProcess(conf.Conf.Label)
 }
 
 func (p *Process) initDispatch() {
 	for _, dp := range conf.Conf.Dispatch.LabelMatch {
-		if lb := buildLabel(dp.Label); lb != nil {
+		if lb := buildLabel(dp.LabelKV); lb != nil {
 			m := labelMatch{
 				label:    *lb,
 				Receiver: dp.Receiver,
@@ -106,43 +68,15 @@ func (p *Process) initDispatch() {
 	}
 }
 
-func matchRegex(re []*regexp.Regexp, str string) bool {
-	for _, r := range re {
-		if r.MatchString(str) {
-			return true
-		}
-	}
-	return false
-}
-
-func matchCombination(ct []combination, k, v string) bool {
-	for _, c := range ct {
-		if c.Key.MatchString(k) && c.Value.MatchString(v) {
-			return true
-		}
-	}
-	return false
-}
-
 func (p *Process) Filter(alerts ...model.Alert) []model.Alert {
-	if p.filter == nil {
-		return alerts
-	}
-	result := make([]model.Alert, 0, len(alerts))
-	for _, alert := range alerts {
-		skip := false
-		for k, v := range alert.Labels {
-			if skip = matchRegex(p.filter.Key, k) ||
-				matchRegex(p.filter.Value, v) ||
-				matchCombination(p.filter.Combination, k, v); skip {
-				break
-			}
-		}
-		if !skip {
-			result = append(result, alert)
-		}
-	}
-	return result
+	alerts = p.alertPcs.Filter(alerts...)
+	alerts = p.labelPcs.Filter(alerts...)
+	return alerts
+}
+
+func (p *Process) Replace(alerts ...model.Alert) []model.Alert {
+	alerts = p.labelPcs.Replace(alerts...)
+	return alerts
 }
 
 func (p *Process) Dispatch(alerts ...model.Alert) []model.Alert {

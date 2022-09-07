@@ -1,21 +1,46 @@
 # filter alarms contain label
-filter:
-  label:
-    key: [ demo,^demo*$,^test$ ]
-    value: [ demo,^demo$, ^test$ ]
-    combination:
-      - demo: demo
-      - ^(demo)$: ^demo$
-      - demo: ^demo$
+alert:
+  filter:
+    label:
+      key: [ demo,^demo*$,^test$ ]
+      value: [ demo,^demo$, ^test$ ]
+      combination:
+        - alertname: ^.*test.*$
+        - demo: demo
+        - ^(demo)$: ^demo$
+        - demo: ^demo$
 
-# replace alarms label key value
-replace:
+label:
+  exclude: # exclude label kv
+    label:
+      key: [ label ]
+  #      value: [ demo,^demo$, ^test$ ]
+  #      combination:
+  #        - alertname: ^.*test.*$
+  #        - demo: demo
+  #        - ^(demo)$: ^demo$
+  #        - demo: ^demo$
 
+  keep: # reserve label kv
+      label:
+        key: [ job ]
+        value: [ ]
+        combination:
+
+  replace:
+    label:
+      key:
+        - regex: ^alert(.*)$ # exp. alertname result: name
+          value: name
+        - regex: ^alert(.*)$ #exp. alertbot result: bot
+      value:
+        - regex: ^subscan-(.*)$
 
 # match label choose receiver
 dispatch:
   labelExtractSender:
     - job: ^who-(.*)$  # exp. who-slack  extract: [slack] match [receivers.name]
+      network: ^(.*)$  # exp. slack  extract: [slack] match [receivers.name]
   labelMatch:
     - key: [ demo,^demo*$ ]
       value: [ demo,^demo$ ]
@@ -54,7 +79,7 @@ email:
   secret: "secret"
 
 matrix:
-  - name: martix
+  - name: matrix
     host: https://matrix.org
     user:
     password:
