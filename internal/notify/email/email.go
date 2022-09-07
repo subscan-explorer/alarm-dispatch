@@ -36,7 +36,10 @@ func New(c conf.Receiver) *Email {
 
 // Notify implements the Notifier interface.
 func (e *Email) Notify(ctx context.Context, common map[string]string, alert model.Alert) (bool, error) {
-	return false, e.sender.SendEmail(ctx, e.conf.To, common, alert)
+	if err := e.sender.SendEmail(ctx, e.conf.To, common, alert); err != nil {
+		return true, err
+	}
+	return false, nil
 }
 
 func initSender() {

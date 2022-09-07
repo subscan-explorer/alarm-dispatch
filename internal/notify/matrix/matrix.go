@@ -3,7 +3,6 @@ package matrix
 import (
 	"context"
 	"log"
-	"strings"
 	"sync"
 
 	"github.com/subscan-explorer/alarm-dispatch/conf"
@@ -27,7 +26,7 @@ func (s *Sender) Notify(_ context.Context, _ map[string]string, alert model.Aler
 	_, err := s.cli.SendMessageEvent(s.conf.RoomID, event.EventMessage, &event.MessageEventContent{
 		MsgType:       event.MsgText,
 		Format:        event.FormatHTML,
-		FormattedBody: strings.ReplaceAll(alert.HTML(), "\n", "<br/>"),
+		FormattedBody: alert.HTML("<br>", "&nbsp;"),
 	})
 	return false, err
 }

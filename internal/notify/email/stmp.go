@@ -19,7 +19,7 @@ func (s *SMTP) SendEmail(_ context.Context, to []string, common map[string]strin
 	msg.SetHeader("From", s.from)
 	msg.SetHeader("To", to...)
 	msg.SetHeader("Subject", common["summary"])
-	msg.SetBody("text/html", alert.EmailHTML())
+	msg.SetBody("text/html", alert.HTML("<br>", "&nbsp;"))
 	return s.cli.DialAndSend(msg)
 }
 

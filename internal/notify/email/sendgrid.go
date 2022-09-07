@@ -22,7 +22,7 @@ func (s *Sendgrid) SendEmail(_ context.Context, to []string, common map[string]s
 			common["summary"],
 			mail.NewEmail("", rc),
 			"",
-			alert.EmailHTML())
+			alert.HTML("<br>", "&nbsp;"))
 		rsp, err := s.cli.Send(message)
 		if err != nil {
 			return err
