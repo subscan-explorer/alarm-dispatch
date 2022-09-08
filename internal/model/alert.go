@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 )
 
@@ -16,6 +17,10 @@ type Alert struct {
 	StartsAt    time.Time         `json:"startsAt"`
 	EndsAt      time.Time         `json:"endsAt"`
 	Receiver    []string          `json:"-"`
+}
+
+func (a Alert) GetTitle() string {
+	return "Alert " + strings.Title(a.Status)
 }
 
 type Notification struct {
