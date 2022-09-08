@@ -29,7 +29,7 @@ func (a Alert) Markdown() string {
 	text := pool.Get().(*bytes.Buffer)
 	text.Reset()
 	text.WriteByte('*')
-	text.WriteString(a.Status)
+	text.WriteString(strings.Title(a.Status))
 	text.WriteByte('*')
 	text.WriteByte('\n')
 	text.WriteString("*Time*: ")
@@ -68,7 +68,7 @@ func (a Alert) HTML(lf, space string) string {
 	buf := pool.Get().(*bytes.Buffer)
 	buf.Reset()
 	buf.WriteString("<b><i>")
-	buf.WriteString(a.Status)
+	buf.WriteString(strings.Title(a.Status))
 	buf.WriteString("</i></b>")
 	buf.WriteString(lf)
 

@@ -19,7 +19,7 @@ func (s *Sendgrid) SendEmail(_ context.Context, to []string, common map[string]s
 	for _, rc := range to {
 		message := mail.NewSingleEmail(
 			mail.NewEmail("Subscan", s.from),
-			common["summary"],
+			alert.GetTitle(),
 			mail.NewEmail("", rc),
 			"",
 			alert.HTML("<br>", "&nbsp;"))
