@@ -25,7 +25,6 @@ func Dispatch(alert model.Notification) {
 	alert.Alerts = pr.Filter(alert.Alerts...)
 	alert.Alerts = pr.Replace(alert.Alerts...)
 	alert.Alerts = pr.Dispatch(alert.Alerts...)
-	log.Printf("alert: %+v\n", alert)
 	// group
 	var (
 		common = map[string]string{
@@ -35,13 +34,14 @@ func Dispatch(alert model.Notification) {
 	)
 
 	for _, a := range alert.Alerts {
+		log.Printf("alert: %+v\n", a)
 		for _, r := range a.Receiver {
 			if n := notify.GetNoticer(r); n != nil {
 				wg.Add(1)
 				go func(name string, alert model.Alert) {
 					for i := 0; i < 3; i++ {
 						metrics.IncChannelSendCount(name, "send")
-						retry, err := n.Notify(context.Background(), common, a)
+						retry, err := n.Notify(context.Background(), common, alert)
 						if err != nil {
 							metrics.IncChannelSendCount(name, "failed")
 							log.Println("err: ", err.Error())
