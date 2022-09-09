@@ -35,15 +35,14 @@ func New(c conf.Receiver) *Notifier {
 	return notify
 }
 
-func (n *Notifier) Notify(ctx context.Context, common map[string]string, alert model.Alert) (bool, error) {
+func (n *Notifier) Notify(ctx context.Context, alert model.Alert) (bool, error) {
 	var (
-		reqBody, _ = json.Marshal(n.buildMessage(common, alert))
+		reqBody, _ = json.Marshal(n.buildMessage(alert))
 		req        *http.Request
 		host       = n.conf.Webhook + "sendMessage"
 		rsp        *http.Response
 		err        error
 	)
-	fmt.Println(string(reqBody))
 	if req, err = http.NewRequestWithContext(ctx, http.MethodPost, host, bytes.NewReader(reqBody)); err != nil {
 		return true, err
 	}
@@ -52,16 +51,14 @@ func (n *Notifier) Notify(ctx context.Context, common map[string]string, alert m
 		return true, err
 	}
 	defer rsp.Body.Close()
-	//_, _ = io.Copy(io.Discard, rsp.Body)
-	rspBody, _ := io.ReadAll(rsp.Body)
-	fmt.Println(string(rspBody))
+	_, _ = io.Copy(io.Discard, rsp.Body)
 	if rsp.StatusCode != 200 {
 		return false, errors.New(rsp.Status)
 	}
 	return false, nil
 }
 
-func (n *Notifier) buildMessage(_ map[string]string, alert model.Alert) Message {
+func (n *Notifier) buildMessage(alert model.Alert) Message {
 	return Message{
 		ChatID:    n.conf.ChatID,
 		Text:      alert.HTML("\n", ""),

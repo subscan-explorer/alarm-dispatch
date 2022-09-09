@@ -33,12 +33,9 @@ func New(c conf.Receiver) *Notifier {
 }
 
 // Notify implements the Notifier interface.
-func (n *Notifier) Notify(ctx context.Context, common map[string]string, alert model.Alert) (bool, error) {
-	if len(common) == 0 {
-		return false, nil
-	}
+func (n *Notifier) Notify(ctx context.Context, alert model.Alert) (bool, error) {
 	var (
-		reqBody, _ = json.Marshal(n.buildMessage(common, alert))
+		reqBody, _ = json.Marshal(n.buildMessage(alert))
 		req        *http.Request
 		rsp        *http.Response
 		err        error
@@ -58,7 +55,7 @@ func (n *Notifier) Notify(ctx context.Context, common map[string]string, alert m
 	return false, nil
 }
 
-func (n *Notifier) buildMessage(_ map[string]string, alert model.Alert) Message {
+func (n *Notifier) buildMessage(alert model.Alert) Message {
 	msg := Message{}
 	msg.Blocks = append(msg.Blocks, Block{
 		Type: "header",

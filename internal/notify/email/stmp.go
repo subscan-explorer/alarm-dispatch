@@ -14,7 +14,7 @@ type SMTP struct {
 	from string
 }
 
-func (s *SMTP) SendEmail(_ context.Context, to []string, common map[string]string, alert model.Alert) error {
+func (s *SMTP) SendEmail(_ context.Context, to []string, alert model.Alert) error {
 	msg := gomail.NewMessage()
 	msg.SetHeader("From", s.from)
 	msg.SetHeader("To", to...)
