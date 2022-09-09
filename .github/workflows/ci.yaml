@@ -4,24 +4,6 @@ on:
     tags: ["*"]
 
 jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-go@v2
-        with:
-          go-version: ~1.14.0
-      - run: |
-          TAG=$(git describe --tags --abbrev=0 HEAD)
-          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^)
-          RELEASE_NOTES=$(git log "$LAST_TAG..HEAD" --oneline --decorate)
-
-          go get -u github.com/tcnksm/ghr
-          ghr -b "${RELEASE_NOTES}" -t "${{ secrets.GITHUB_TOKEN }}" -u "${GITHUB_REPOSITORY%%/*}" -recreate "${TAG}"
-
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
