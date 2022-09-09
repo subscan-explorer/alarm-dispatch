@@ -15,7 +15,7 @@ type Sendgrid struct {
 	from string
 }
 
-func (s *Sendgrid) SendEmail(_ context.Context, to []string, common map[string]string, alert model.Alert) error {
+func (s *Sendgrid) SendEmail(_ context.Context, to []string, alert model.Alert) error {
 	for _, rc := range to {
 		message := mail.NewSingleEmail(
 			mail.NewEmail("Subscan", s.from),

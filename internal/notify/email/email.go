@@ -11,7 +11,7 @@ import (
 )
 
 type Sender interface {
-	SendEmail(context.Context, []string, map[string]string, model.Alert) error
+	SendEmail(context.Context, []string, model.Alert) error
 }
 
 // Email implements a Notifier for email notifications.
@@ -35,8 +35,8 @@ func New(c conf.Receiver) *Email {
 }
 
 // Notify implements the Notifier interface.
-func (e *Email) Notify(ctx context.Context, common map[string]string, alert model.Alert) (bool, error) {
-	if err := e.sender.SendEmail(ctx, e.conf.To, common, alert); err != nil {
+func (e *Email) Notify(ctx context.Context, alert model.Alert) (bool, error) {
+	if err := e.sender.SendEmail(ctx, e.conf.To, alert); err != nil {
 		return true, err
 	}
 	return false, nil
@@ -51,5 +51,5 @@ func initSender() {
 		sender = NewSMTP(conf.Conf.Email)
 		return
 	}
-	log.Fatalln("not configure email send account")
+	log.Println("not configure email send account")
 }

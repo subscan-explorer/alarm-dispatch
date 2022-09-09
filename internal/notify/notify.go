@@ -15,7 +15,7 @@ import (
 var noticer map[string]Notifier
 
 type Notifier interface {
-	Notify(context.Context, map[string]string, model.Alert) (bool, error)
+	Notify(context.Context, model.Alert) (bool, error)
 }
 
 func Init() {

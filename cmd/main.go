@@ -36,7 +36,6 @@ func main() {
 	}()
 	listenExit(cancel)
 	_ = srv.Close()
-	cancel()
 }
 func listenExit(cancel context.CancelFunc) {
 	sign := make(chan os.Signal, 1)

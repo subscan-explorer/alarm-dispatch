@@ -22,7 +22,7 @@ type Sender struct {
 	cli *mautrix.Client
 }
 
-func (s *Sender) Notify(_ context.Context, _ map[string]string, alert model.Alert) (bool, error) {
+func (s *Sender) Notify(_ context.Context, alert model.Alert) (bool, error) {
 	_, err := s.cli.SendMessageEvent(s.conf.RoomID, event.EventMessage, &event.MessageEventContent{
 		MsgType:       event.MsgText,
 		Format:        event.FormatHTML,

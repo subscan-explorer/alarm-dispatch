@@ -3,7 +3,6 @@ package conf
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 
@@ -109,7 +108,6 @@ func InitConf(_ context.Context) {
 	if err = yaml.Unmarshal(data, &Conf); err != nil {
 		log.Fatalf("failed to parse configuration file. err: %s\n", err.Error())
 	}
-	fmt.Printf("%+v\n", Conf)
 	// check channel
 	emailConf := false
 	slack := false
@@ -172,7 +170,6 @@ func InitConf(_ context.Context) {
 			if len(matrix.Name) == 0 {
 				log.Fatalln("matrix needs to configure name")
 			}
-
 		}
 	}
 }
