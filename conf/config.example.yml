@@ -56,6 +56,11 @@ receivers:
     type: "slack"
     webhook: https://hooks.slack.com/services/TOKEN
 
+  - name: "slackapp"
+    type: "slack"
+    chatID: test-alarm
+    sender: slack
+
   - name: "tg"
     type: "telegram"
     token: telegram:TOKEN
@@ -83,3 +88,7 @@ matrix:
     host: https://matrix.org
     user:
     password:
+
+slack:
+  - name: slack
+    token:

@@ -17,10 +17,11 @@ Content-Type: application/json
       "labels": {
         "labels": "labels",
         "xx": "ss",
-        "job": "subscan-email"
+        "job": "production/subscan-kulu"
       },
       "annotations": {
-        "title": "this is something message1"
+        "summary": "this is something message1",
+        "describe": "详情"
       },
       "startsAt": "2022-08-31T15:41:12.79281+08:00",
       "endsAt": "2022-08-31T17:41:12.79281+08:00"
@@ -28,38 +29,13 @@ Content-Type: application/json
     {
       "status": "firing",
       "labels": {
-        "labels": "hehe",
+        "labels": "labels",
         "xx": "ss",
-        "job": "subscan-element"
+        "job": "production/subscan-acala"
       },
       "annotations": {
-        "title": "this is something message2"
-      },
-      "startsAt": "2022-08-31T15:41:12.79281+08:00",
-      "endsAt": "2022-08-31T17:41:12.79281+08:00"
-    },
-    {
-      "status": "firing",
-      "labels": {
-        "labels": "hehe",
-        "xx": "ss",
-        "job": "subscan-slack"
-      },
-      "annotations": {
-        "title": "this is something message3"
-      },
-      "startsAt": "2022-08-31T15:41:12.79281+08:00",
-      "endsAt": "2022-08-31T17:41:12.79281+08:00"
-    },
-    {
-      "status": "firing",
-      "labels": {
-        "labels": "hehe",
-        "xx": "ss",
-        "job": "subscan-tg"
-      },
-      "annotations": {
-        "title": "this is something message4"
+        "summary": "this is something message1",
+        "describe": "详情"
       },
       "startsAt": "2022-08-31T15:41:12.79281+08:00",
       "endsAt": "2022-08-31T17:41:12.79281+08:00"

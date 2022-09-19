@@ -17,6 +17,7 @@ type Config struct {
 	Dispatch  Dispatch   `yaml:"dispatch"`
 	Receivers []Receiver `yaml:"receivers"`
 	Email     Email      `yaml:"email"`
+	Slack     []Slack    `yaml:"slack"`
 	Matrix    []Matrix   `yaml:"matrix"`
 }
 
@@ -91,6 +92,11 @@ type Matrix struct {
 	Password string `yaml:"password"`
 }
 
+type Slack struct {
+	Name  string `yaml:"name"`
+	Token string `yaml:"token"`
+}
+
 var path *string
 
 func init() {
@@ -109,8 +115,7 @@ func InitConf(_ context.Context) {
 		log.Fatalf("failed to parse configuration file. err: %s\n", err.Error())
 	}
 	// check channel
-	emailConf := false
-	slack := false
+	emailConf, matrixConf, slackConf := false, false, false
 	for _, c := range Conf.Receivers {
 		switch c.Type {
 		case "email":
@@ -119,10 +124,12 @@ func InitConf(_ context.Context) {
 			}
 			emailConf = true
 		case "slack":
-			if len(c.Webhook) == 0 {
-				log.Fatalln("slack needs to configure webhook")
+			if len(c.Webhook) == 0 && (len(c.ChatID) == 0 || len(c.Sender) == 0) {
+				log.Fatalln("slack needs to configure webhook or chatID and Sender")
 			}
-			slack = true
+			if len(c.ChatID) != 0 && len(c.Sender) != 0 {
+				slackConf = true
+			}
 		case "telegram":
 			if len(c.Webhook) == 0 && len(c.Token) == 0 {
 				log.Fatalln("telegram needs to configure webhook or token")
@@ -137,6 +144,7 @@ func InitConf(_ context.Context) {
 			if len(c.RoomID) == 0 {
 				log.Fatalln("element needs to configure roomID")
 			}
+			matrixConf = true
 		}
 	}
 	if emailConf {
@@ -153,7 +161,12 @@ func InitConf(_ context.Context) {
 			log.Fatalln("email needs to configure secret")
 		}
 	}
-	if slack {
+	if slackConf {
+		if len(Conf.Slack) == 0 {
+			log.Fatalln("needs to configure slack sender")
+		}
+	}
+	if matrixConf {
 		if len(Conf.Matrix) == 0 {
 			log.Fatalln("needs to configure matrix")
 		}

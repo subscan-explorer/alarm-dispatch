@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/subscan-explorer/alarm-dispatch/internal/metrics"
 	"github.com/subscan-explorer/alarm-dispatch/internal/model"
@@ -43,6 +44,7 @@ func Dispatch(alert model.Notification) {
 							metrics.IncChannelSendCount(name, "success")
 						}
 						if !retry {
+							time.Sleep(time.Second)
 							break
 						}
 					}
