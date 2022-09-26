@@ -1,0 +1,46 @@
+POST http://localhost:8080/alert_manager
+Content-Type: application/json
+
+{
+  "version": "4",
+  "status": "firing",
+  "groupLabels": {
+  },
+  "commonLabels": {
+  },
+  "commonAnnotations": {
+    "summary": "alarms demo"
+  },
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "labels": "labels",
+        "xx": "ss",
+        "job": "production/subscan-kulu"
+      },
+      "annotations": {
+        "summary": "this is something message1",
+        "describe": "详情"
+      },
+      "startsAt": "2022-08-31T15:41:12.79281+08:00",
+      "endsAt": "2022-08-31T17:41:12.79281+08:00"
+    },
+    {
+      "status": "firing",
+      "labels": {
+        "labels": "labels",
+        "xx": "ss",
+        "job": "production/subscan-acala"
+      },
+      "annotations": {
+        "summary": "this is something message1",
+        "describe": "详情"
+      },
+      "startsAt": "2022-08-31T15:41:12.79281+08:00",
+      "endsAt": "2022-08-31T17:41:12.79281+08:00"
+    }
+  ]
+}
+
+###

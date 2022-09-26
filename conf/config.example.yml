@@ -1,0 +1,94 @@
+# filter alarms contain label
+alert:
+  filter:
+    label:
+      key: [ demo,^demo*$,^test$ ]
+      value: [ demo,^demo$, ^test$ ]
+      combination:
+        - alertname: ^.*test.*$
+        - demo: demo
+        - ^(demo)$: ^demo$
+        - demo: ^demo$
+
+label:
+  exclude: # exclude label kv
+    label:
+      key: [ label ]
+  #      value: [ demo,^demo$, ^test$ ]
+  #      combination:
+  #        - alertname: ^.*test.*$
+  #        - demo: demo
+  #        - ^(demo)$: ^demo$
+  #        - demo: ^demo$
+
+  keep: # reserve label kv
+      label:
+        key: [ job ]
+        value: [ ]
+        combination:
+
+  replace:
+    label:
+      key:
+        - regex: ^alert(.*)$ # exp. alertname result: name
+          value: name
+        - regex: ^alert(.*)$ #exp. alertbot result: bot
+      value:
+        - regex: ^subscan-(.*)$
+
+# match label choose receiver
+dispatch:
+  labelExtractSender:
+    - job: ^who-(.*)$  # exp. who-slack  extract: [slack] match [receivers.name]
+      network: ^(.*)$  # exp. slack  extract: [slack] match [receivers.name]
+  labelMatch:
+    - key: [ demo,^demo*$ ]
+      value: [ demo,^demo$ ]
+      combination:
+        - demo: demo
+        - ^(demo)$: ^demo$
+        - demo: ^demo$
+      receiver: [ slack,tg ]
+
+# receiver name need uniq
+receivers:
+  - name: "slack"
+    type: "slack"
+    webhook: https://hooks.slack.com/services/TOKEN
+
+  - name: "slackapp"
+    type: "slack"
+    chatID: test-alarm
+    sender: slack
+
+  - name: "tg"
+    type: "telegram"
+    token: telegram:TOKEN
+    chatID: chatIDStr
+
+  - name: "email"
+    type: "email"
+    email: [receive@email.com,receive2@email.com]
+
+  - name: "element"
+    type: "element"
+    roomID: "!id:matrix.org"
+    sender: matrix # match matrix.name
+
+email:
+  type: smtp  #  sendgrid | smtp
+  sender: "email"
+  host: "smtp.*.com"
+  port: 587
+  user: "something"
+  secret: "secret"
+
+matrix:
+  - name: matrix
+    host: https://matrix.org
+    user:
+    password:
+
+slack:
+  - name: slack
+    token:
