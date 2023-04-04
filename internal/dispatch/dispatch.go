@@ -43,10 +43,13 @@ func Dispatch(alert model.Notification) {
 						} else {
 							metrics.IncChannelSendCount(name, "success")
 						}
-						if !retry {
+						if retry {
 							time.Sleep(time.Second)
-							break
+							continue
 						}
+						// Delete after sending successfully
+						n.RemoveLastMessage(context.Background())
+						break
 					}
 					wg.Done()
 				}(r, a)

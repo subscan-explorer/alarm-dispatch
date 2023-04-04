@@ -19,15 +19,38 @@ type Sender struct {
 	conf struct {
 		RoomID id.RoomID
 	}
-	cli *mautrix.Client
+	lastEventID [2]string
+	cli         *mautrix.Client
+}
+
+func (s *Sender) RemoveLastMessage(context.Context) {
+	if len(s.lastEventID[1]) != 0 {
+		if _, err := s.cli.RedactEvent(s.conf.RoomID, id.EventID(s.lastEventID[1])); err != nil {
+			log.Printf("failed to delete matrix message: %s, err: %s", s.lastEventID[1], err.Error())
+		}
+	}
+	s.lastEventID[1] = ""
 }
 
 func (s *Sender) Notify(_ context.Context, alert model.Alert) (bool, error) {
-	_, err := s.cli.SendMessageEvent(s.conf.RoomID, event.EventMessage, &event.MessageEventContent{
+	if alert.IsResolved() {
+		if len(s.lastEventID[0]) != 0 {
+			s.lastEventID[1], s.lastEventID[0] = s.lastEventID[0], ""
+		}
+		return false, nil
+	}
+	rsp, err := s.cli.SendMessageEvent(s.conf.RoomID, event.EventMessage, &event.MessageEventContent{
 		MsgType:       event.MsgText,
 		Format:        event.FormatHTML,
 		FormattedBody: alert.HTML("<br>", "&nbsp;"),
 	})
+	if err != nil {
+		return true, err
+	}
+	if len(s.lastEventID[0]) != 0 {
+		s.lastEventID[1] = s.lastEventID[0]
+	}
+	s.lastEventID[0] = rsp.EventID.String()
 	return false, err
 }
 

@@ -10,6 +10,13 @@ const (
 	AlertStatusResolved = "resolved"
 )
 
+type AlertType int8
+
+const (
+	AlertFiring AlertType = iota
+	AlertResolved
+)
+
 type Alert struct {
 	Status      string            `json:"status"`
 	Labels      map[string]string `json:"labels"`
@@ -21,6 +28,17 @@ type Alert struct {
 
 func (a Alert) GetTitle() string {
 	return "Alert " + strings.Title(a.Status)
+}
+
+func (a Alert) AlertType() AlertType {
+	if strings.EqualFold(a.Status, AlertStatusResolved) {
+		return AlertResolved
+	}
+	return AlertFiring
+}
+
+func (a Alert) IsResolved() bool {
+	return a.AlertType() == AlertResolved
 }
 
 type Notification struct {
