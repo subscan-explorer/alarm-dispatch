@@ -24,9 +24,10 @@ var once sync.Once
 
 // Notifier implements a Notifier for Slack notifications.
 type Notifier struct {
-	Webhook string
-	Channel string
-	cli     *slack.Client
+	Webhook       string
+	Channel       string
+	cli           *slack.Client
+	lastMessageID [2][]string // 0=last message 1=need delete message
 }
 
 // New returns a new Slack notification handler.
@@ -53,6 +54,15 @@ func initSender() {
 		}
 		senders[s.Name] = c
 	}
+}
+
+func (n *Notifier) RemoveLastMessage(context.Context) {
+	if len(n.lastMessageID[1]) == 2 {
+		if _, _, err := n.cli.DeleteMessage(n.lastMessageID[1][0], n.lastMessageID[1][1]); err != nil {
+			log.Printf("failed to delete slack message [%s],err: %s\n", n.lastMessageID, err.Error())
+		}
+	}
+	n.lastMessageID[1] = nil
 }
 
 // Notify implements the Notifier interface.
@@ -89,10 +99,21 @@ func (n *Notifier) SendWebhook(ctx context.Context, alert model.Alert) (bool, er
 }
 
 func (n *Notifier) SendChannel(_ context.Context, alert model.Alert) (bool, error) {
+	if alert.IsResolved() {
+		if len(n.lastMessageID[0]) != 0 {
+			n.lastMessageID[1], n.lastMessageID[0] = n.lastMessageID[0], nil
+		}
+		return false, nil
+	}
 	msg := n.buildMessage(alert)
-	if _, _, _, err := n.cli.SendMessage(n.Channel, slack.MsgOptionBlocks(msg.Blocks...)); err != nil {
+	channel, messageID, _, err := n.cli.SendMessage(n.Channel, slack.MsgOptionBlocks(msg.Blocks...))
+	if err != nil {
 		return true, err
 	}
+	if len(n.lastMessageID[0]) != 0 {
+		n.lastMessageID[1] = n.lastMessageID[0]
+	}
+	n.lastMessageID[0] = []string{channel, messageID}
 	return false, nil
 }
 
