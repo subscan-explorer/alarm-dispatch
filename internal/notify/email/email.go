@@ -34,6 +34,9 @@ func New(c conf.Receiver) *Email {
 	return e
 }
 
+func (e *Email) RemoveLastMessage(context.Context) {
+}
+
 // Notify implements the Notifier interface.
 func (e *Email) Notify(ctx context.Context, alert model.Alert) (bool, error) {
 	if err := e.sender.SendEmail(ctx, e.conf.To, alert); err != nil {

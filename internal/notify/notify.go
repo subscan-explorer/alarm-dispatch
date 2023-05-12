@@ -16,6 +16,7 @@ var noticer map[string]Notifier
 
 type Notifier interface {
 	Notify(context.Context, model.Alert) (bool, error)
+	RemoveLastMessage(context.Context)
 }
 
 func Init() {

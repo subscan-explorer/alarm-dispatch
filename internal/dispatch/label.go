@@ -66,10 +66,8 @@ func (l *LabelProcess) excludeLabel(m map[string]string) map[string]string {
 
 func (l *LabelProcess) keepLabel(m map[string]string) map[string]string {
 	for k, v := range m {
-		if matchRegex(l.keep.Key, k) ||
-			matchRegex(l.keep.Value, v) ||
-			matchCombination(l.keep.Combination, k, v) {
-		} else {
+		if !(matchRegex(l.keep.Key, k) ||
+			matchRegex(l.keep.Value, v)) && !matchCombination(l.keep.Combination, k, v) {
 			delete(m, k)
 		}
 	}
