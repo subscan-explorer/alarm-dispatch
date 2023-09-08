@@ -6,6 +6,7 @@ import (
 
 	"github.com/subscan-explorer/alarm-dispatch/conf"
 	"github.com/subscan-explorer/alarm-dispatch/internal/model"
+	"github.com/subscan-explorer/alarm-dispatch/internal/notify/discord"
 	"github.com/subscan-explorer/alarm-dispatch/internal/notify/email"
 	"github.com/subscan-explorer/alarm-dispatch/internal/notify/matrix"
 	"github.com/subscan-explorer/alarm-dispatch/internal/notify/slack"
@@ -32,6 +33,8 @@ func Init() {
 			rc = email.New(receiver)
 		case "element":
 			rc = matrix.New(receiver)
+		case "discord":
+			rc = discord.New(receiver)
 		}
 		if rc != nil {
 			noticer[receiver.Name] = rc
