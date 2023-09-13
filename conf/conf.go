@@ -18,6 +18,7 @@ type Config struct {
 	Receivers []Receiver `yaml:"receivers"`
 	Email     Email      `yaml:"email"`
 	Slack     []Slack    `yaml:"slack"`
+	Discord   []Discord  `yaml:"discord"`
 	Matrix    []Matrix   `yaml:"matrix"`
 }
 
@@ -90,6 +91,11 @@ type Matrix struct {
 	Host     string `yaml:"host"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
+}
+
+type Discord struct {
+	Name  string `yaml:"name"`
+	Token string `yaml:"token"`
 }
 
 type Slack struct {

@@ -30,27 +30,19 @@ label:
   replace:
     label:
       key:
-        - regex: ^alert(.*)$ # exp. alertname result: name
-          value: name
-        - regex: ^alert(.*)$ #exp. alertbot result: bot
+        - regex: ^exported_endpoint$
+          value: endpoint
+        - regex: job
+          value: network
       value:
-        - regex: ^subscan-(.*)$
+        - regex: ^production/subscan-(.*)$
 
 # match label choose receiver
 dispatch:
   labelExtractSender:
-    - job: ^who-(.*)$  # exp. who-slack  extract: [slack] match [receivers.name]
-      network: ^(.*)$  # exp. slack  extract: [slack] match [receivers.name]
-  labelMatch:
-    - key: [ demo,^demo*$ ]
-      value: [ demo,^demo$ ]
-      combination:
-        - demo: demo
-        - ^(demo)$: ^demo$
-        - demo: ^demo$
-      receiver: [ slack,tg ]
+    - network: ^(.*)$  # replace label [job to network] match [receivers.name]
 
-# receiver name need uniq
+# receiver
 receivers:
   - name: "slack"
     type: "slack"
@@ -58,7 +50,7 @@ receivers:
 
   - name: "slackapp"
     type: "slack"
-    chatID: test-alarm
+    chatID: "test-alarm"
     sender: slack
 
   - name: "tg"
@@ -91,4 +83,8 @@ matrix:
 
 slack:
   - name: slack
+    token:
+
+discord:
+  - name: discord
     token:
