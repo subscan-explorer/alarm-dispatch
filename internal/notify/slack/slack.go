@@ -56,7 +56,12 @@ func initSender() {
 	}
 }
 
+// RemoveLastMessage deletes the previous channel message after a successful send.
 func (n *Notifier) RemoveLastMessage(context.Context) {
+	// Webhooks have no channel message state to clean up concurrently.
+	if n.cli == nil {
+		return
+	}
 	if len(n.lastMessageID[1]) == 2 {
 		if _, _, err := n.cli.DeleteMessage(n.lastMessageID[1][0], n.lastMessageID[1][1]); err != nil {
 			log.Printf("failed to delete slack message [%s],err: %s\n", n.lastMessageID, err.Error())
