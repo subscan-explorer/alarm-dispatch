@@ -1,8 +1,9 @@
-FROM golang:1.19 as build
+FROM golang:1.26.10 AS build
 
 ENV CGO_ENABLED 0
 ENV GOOS linux
 ENV GOARCH=amd64
+ENV GOTOOLCHAIN=local
 
 WORKDIR /build/cache
 ADD go.mod .
